@@ -13,7 +13,7 @@ public class RateLimitConfig {
     @Bean
     public RateLimiter rateLimiter() {
         RateLimiterConfig rateLimiterConfig = RateLimiterConfig.custom()
-                .limitForPeriod(100) //TODO REVISAR
+                .limitForPeriod(100)
                 .limitRefreshPeriod(Duration.ofSeconds(10))
                 .timeoutDuration(Duration.ofSeconds(5))
                 .build();

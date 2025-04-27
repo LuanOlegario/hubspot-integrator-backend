@@ -1,30 +1,36 @@
 package br.com.meetime.hubspotintegrator.controller;
 
-import br.com.meetime.hubspotintegrator.service.HubspotOAuthService;
+import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDTO;
+import br.com.meetime.hubspotintegrator.service.OAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.result.view.RedirectView;
 
 import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/oauth")
 public class OAuthController {
 
-    private final HubspotOAuthService hubspotOAuthService;
+    private final OAuthService OAuthService;
 
     @GetMapping("/authorize")
-    public void getAuthorizationUrl(HttpServletResponse response) throws IOException {
-        response.sendRedirect(hubspotOAuthService.generateAuthorizationUrl());
+    public RedirectView getAuthorizationUrl() {
+        String authorizationUrl = OAuthService.generateAuthorizationUrl();
+        log.info("Redirecionando para autorização do HubSpot: {}", authorizationUrl);
+        return new RedirectView(authorizationUrl);
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<String> handleCallback(@RequestParam("code") String code,
-                                                 HttpSession session) {
-        String token = hubspotOAuthService.exchangeCodeForToken(code, session.getId());
-        return ResponseEntity.ok(token);
+    public void handleCallback(@RequestParam("code") String code,
+                               HttpSession session, HttpServletResponse response) throws IOException {
+        OAuthService.exchangeCodeForToken(code, session);
+        log.info("Usuário autenticado com sucesso no HubSpot.");
+        response.sendRedirect("/create-contact.html");
     }
 }

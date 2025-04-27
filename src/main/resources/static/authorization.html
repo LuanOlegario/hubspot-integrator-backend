@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Conectar ao HubSpot</title>
+</head>
+<body>
+<h1>Conectar Integração com HubSpot</h1>
+
+<button onclick="startAuthorization()">Autorizar</button>
+
+<script>
+    function startAuthorization() {
+        fetch('/api/oauth/authorize')
+            .then(response => response.json())
+            .then(data => {
+                window.location.href = data.url;
+            })
+            .catch(error => {
+                console.error('Erro ao gerar a URL de autorização:', error);
+                alert('Erro ao iniciar a autorização.');
+            });
+    }
+</script>
+</body>
+</html>

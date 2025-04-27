@@ -1,8 +1,10 @@
 package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
+import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
-public class HubspotOAuthService {
+public class OAuthService {
 
     private final HubspotProperties hubspotProperties;
-    private final WebClient webClient = WebClient.create();
+    private final WebClient webClient;
 
     private final Map<String, String> refreshTokenStore = new ConcurrentHashMap<>();
     private final Map<String, String> accessTokenCache = new ConcurrentHashMap<>();
@@ -41,21 +43,21 @@ public class HubspotOAuthService {
                 .toUriString();
     }
 
-    public String exchangeCodeForToken(String code, String sessionUserId) {
+    public void exchangeCodeForToken(String code, HttpSession session) {
         String body = buildAuthorizationCodeBody(code);
         String response = sendTokenRequest(body);
-        return parseAndStoreTokens(response, sessionUserId);
+        parseAndStoreTokens(response, session);
     }
 
-    public String refreshAccessToken(String sessionUserId) {
-        String refreshToken = refreshTokenStore.get(sessionUserId);
+    public TokenResponseDTO refreshAccessToken(HttpSession session) {
+        String refreshToken = refreshTokenStore.get(session.getId());
         if (refreshToken == null) {
             throw new RuntimeException("Refresh token não encontrado para esta sessão.");
         }
 
         String body = buildRefreshTokenBody(refreshToken);
         String response = sendTokenRequest(body);
-        return parseAndStoreTokens(response, sessionUserId);
+        return parseAndStoreTokens(response, session);
     }
 
     private String buildAuthorizationCodeBody(String code) {
@@ -87,7 +89,7 @@ public class HubspotOAuthService {
                 .block();
     }
 
-    private String parseAndStoreTokens(String response, String sessionUserId) {
+    private TokenResponseDTO parseAndStoreTokens(String response, HttpSession session) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
@@ -95,15 +97,17 @@ public class HubspotOAuthService {
             String accessToken = json.get("access_token").asText();
             String refreshToken = json.has("refresh_token")
                     ? json.get("refresh_token").asText()
-                    : refreshTokenStore.get(sessionUserId);
+                    : refreshTokenStore.get(session.getId());
 
-            accessTokenCache.put(sessionUserId, accessToken);
-            refreshTokenStore.put(sessionUserId, refreshToken);
+            accessTokenCache.put(session.getId(), accessToken);
+            refreshTokenStore.put(session.getId(), refreshToken);
 
             int expiresIn = json.get("expires_in").asInt();
-            accessTokenExpirationCache.put(sessionUserId, Instant.now().plusSeconds(expiresIn));
+            accessTokenExpirationCache.put(session.getId(), Instant.now().plusSeconds(expiresIn));
+            session.setAttribute("accessToken", accessToken);
+            session.setAttribute("refreshToken", refreshToken);
 
-            return accessToken;
+            return new TokenResponseDTO(accessToken, refreshToken, expiresIn);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao processar resposta do HubSpot", e);
         }
@@ -114,15 +118,15 @@ public class HubspotOAuthService {
         return expirationTime != null && Instant.now().isAfter(expirationTime);
     }
 
-    public String getValidAccessToken(String sessionUserId) {
-        String accessToken = accessTokenCache.get(sessionUserId);
+    public String getValidAccessToken(HttpSession session) {
+        String accessToken = accessTokenCache.get(session.getId());
 
         if (accessToken == null) {
             throw new RuntimeException("Access Token não encontrado para esta sessão.");
         }
 
-        if (isAccessTokenExpired(sessionUserId)) {
-            return refreshAccessToken(sessionUserId);
+        if (isAccessTokenExpired(session.getId())) {
+            return refreshAccessToken(session).accessToken();
         }
         return accessToken;
     }

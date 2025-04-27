@@ -1,6 +1,5 @@
 package br.com.meetime.hubspotintegrator.config;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,12 +17,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/oauth/**").permitAll()
+                        .requestMatchers("/authorization.html").permitAll()
+                        .requestMatchers("/create-contact.html").permitAll() //TODO MELHORIA, PEGAR O TOKEN E SÓ DEIXAR ACESSAR SE O USER ESTIVER LOGADO
                         .anyRequest().authenticated()
-                )
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
-                        )
                 );
         return http.build();
     }
