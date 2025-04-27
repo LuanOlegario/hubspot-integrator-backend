@@ -1,6 +1,7 @@
 package br.com.meetime.hubspotintegrator.controller;
 
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
+import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
 import br.com.meetime.hubspotintegrator.service.ContactService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,8 @@ public class ContactController {
     private final ContactService contactService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> createContact(@RequestBody CreateContactDto createContactDto, HttpSession session) {
-        contactService.createContact(createContactDto, session);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<ContactResponseDto> createContact(@RequestBody CreateContactDto createContactDto, HttpSession session) {
+        ContactResponseDto contactResponse = contactService.createContact(createContactDto, session);
+        return ResponseEntity.status(HttpStatus.CREATED).body(contactResponse);
     }
 }

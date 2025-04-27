@@ -1,11 +1,15 @@
 package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
+import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
+import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
+import br.com.meetime.hubspotintegrator.exception.HubSpotRateLimitExceededException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,23 +24,28 @@ public class ContactService {
     private final WebClient webClient;
 
     @RateLimiter(name = "hubspotApi")
-    public void createContact(CreateContactDto createContactDto, HttpSession session) {
+    public ContactResponseDto createContact(CreateContactDto createContactDto, HttpSession session) {
         try {
             String accessToken = OAuthService.getValidAccessToken(session);
 
-            String response = webClient.post()
+            ContactResponseDto response = webClient.post()
                     .uri("/crm/v3/objects/contacts")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(createContactDto)
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(ContactResponseDto.class)
                     .block();
 
             log.info("Contato criado com sucesso no HubSpot: {}", response);
+            return response;
         } catch (WebClientResponseException e) {
             log.error("Erro ao criar contato no HubSpot: Status {} - Body {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
-            throw new RuntimeException("Erro ao criar contato no HubSpot.", e);
+
+            if (e.getStatusCode() == (HttpStatus.TOO_MANY_REQUESTS)) {
+                throw new HubSpotRateLimitExceededException("Limite de requisições da API do HubSpot excedido.");
+            }
+            throw new HubSpotApiException("Erro ao criar contato no HubSpot.");
         }
     }
 }

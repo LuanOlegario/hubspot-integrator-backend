@@ -1,7 +1,9 @@
 package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
-import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDTO;
+import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
+import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
+import br.com.meetime.hubspotintegrator.exception.HubSpotAuthorizationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
@@ -49,10 +51,10 @@ public class OAuthService {
         parseAndStoreTokens(response, session);
     }
 
-    public TokenResponseDTO refreshAccessToken(HttpSession session) {
+    public TokenResponseDto refreshAccessToken(HttpSession session) {
         String refreshToken = refreshTokenStore.get(session.getId());
         if (refreshToken == null) {
-            throw new RuntimeException("Refresh token não encontrado para esta sessão.");
+            throw new HubSpotAuthorizationException("Refresh token não encontrado para esta sessão.");
         }
 
         String body = buildRefreshTokenBody(refreshToken);
@@ -83,13 +85,13 @@ public class OAuthService {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
                         response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new RuntimeException("Erro ao comunicar com HubSpot: " + errorBody)))
+                                .flatMap(errorBody -> Mono.error(new HubSpotApiException("Erro ao comunicar com HubSpot: " + errorBody)))
                 )
                 .bodyToMono(String.class)
                 .block();
     }
 
-    private TokenResponseDTO parseAndStoreTokens(String response, HttpSession session) {
+    private TokenResponseDto parseAndStoreTokens(String response, HttpSession session) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
@@ -107,9 +109,9 @@ public class OAuthService {
             session.setAttribute("accessToken", accessToken);
             session.setAttribute("refreshToken", refreshToken);
 
-            return new TokenResponseDTO(accessToken, refreshToken, expiresIn);
+            return new TokenResponseDto(accessToken, refreshToken, expiresIn);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao processar resposta do HubSpot", e);
+            throw new HubSpotApiException("Erro ao processar resposta do HubSpot");
         }
     }
 
@@ -122,7 +124,7 @@ public class OAuthService {
         String accessToken = accessTokenCache.get(session.getId());
 
         if (accessToken == null) {
-            throw new RuntimeException("Access Token não encontrado para esta sessão.");
+            throw new HubSpotAuthorizationException("Access Token não encontrado para esta sessão.");
         }
 
         if (isAccessTokenExpired(session.getId())) {

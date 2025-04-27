@@ -1,10 +1,8 @@
 package br.com.meetime.hubspotintegrator.dto.response;
 
-public record ContactResponseDTO(
+public record ContactResponseDto(
         String id,
         ContactResponsePropertiesDto properties,
-        String createdAt,
-        String updatedAt,
-        boolean archived
+        String createdAt
 ) {
 }

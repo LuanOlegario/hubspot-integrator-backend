@@ -1,6 +1,5 @@
 package br.com.meetime.hubspotintegrator.controller;
 
-import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDTO;
 import br.com.meetime.hubspotintegrator.service.OAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
