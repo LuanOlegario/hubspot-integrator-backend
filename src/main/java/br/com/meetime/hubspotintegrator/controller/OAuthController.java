@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+import static br.com.meetime.hubspotintegrator.constants.Constants.ACCESS_TOKEN;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -28,7 +30,7 @@ public class OAuthController {
     public void handleCallback(@RequestParam("code") String code,
                                HttpSession session, HttpServletResponse response) throws IOException {
         OAuthService.exchangeCodeForToken(code, session);
-        String accessToken = (String) session.getAttribute("accessToken");
+        String accessToken = (String) session.getAttribute(ACCESS_TOKEN);
         log.info("Usuário autenticado com sucesso no HubSpot. Access Token: {}", accessToken);
         response.sendRedirect("/create-contact.html");
     }

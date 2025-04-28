@@ -15,8 +15,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/api/**")
-                        .allowedOrigins("http://localhost:8080")
-                        .allowedOrigins("https://bde4-200-159-164-149.ngrok-free.app")
+                        .allowedOrigins(
+                                "http://localhost:8080",
+                                "https://b636-170-82-198-84.ngrok-free.app"
+                        )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
             }
         };

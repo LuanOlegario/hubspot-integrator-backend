@@ -14,47 +14,49 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
+
+import static br.com.meetime.hubspotintegrator.constants.Constants.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ContactService {
 
-    private final OAuthService OAuthService;
-    private final WebClient webClient;
+    private final OAuthService oAuthService;
+    private final RestClient restClient;
 
     @Value("${hubspot.url.contacts}")
     private String urlContacts;
 
-    @RateLimiter(name = "hubspotApi")
+    @RateLimiter(name = HUBSPOT_API_RATE_LIMITER)
     public ContactResponseDto createContact(CreateContactDto createContactDto, HttpSession session) {
         try {
-            String accessToken = OAuthService.getValidAccessToken(session);
-            ContactResponseDto response = webClient.post()
+            String accessToken = oAuthService.getValidAccessToken(session);
+
+            ContactResponseDto response = restClient.post()
                     .uri(urlContacts)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(createContactDto)
+                    .body(createContactDto)
                     .retrieve()
-                    .bodyToMono(ContactResponseDto.class)
-                    .block();
+                    .body(ContactResponseDto.class);
 
             log.info("Contato criado com sucesso no HubSpot: {}", response);
             return response;
-        } catch (WebClientResponseException e) {
+        } catch (HttpClientErrorException e) {
             log.error("Erro ao criar contato no HubSpot: Status {} - Body {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
 
-            if (e.getStatusCode().value() == (HttpStatus.TOO_MANY_REQUESTS.value())) {
-                throw new HubSpotRateLimitExceededException("Limite de requisições da API do HubSpot excedido.");
+            if (e.getStatusCode().value() == HttpStatus.TOO_MANY_REQUESTS.value()) {
+                throw new HubSpotRateLimitExceededException(HUBSPOT_RATE_LIMIT_ERROR_MESSAGE);
             }
 
             if (e.getStatusCode().value() == HttpStatus.CONFLICT.value()) {
                 log.warn("Tentativa de criar contato duplicado no HubSpot. Email: {}", createContactDto.properties().email());
-                throw new HubSpotBadRequestException("Já existe um contato com o e-mail informado.");
+                throw new HubSpotBadRequestException(HUBSPOT_CONTACT_CONFLICT);
             }
         }
-        throw new HubSpotApiException("Erro ao criar contato no HubSpot.");
+        throw new HubSpotApiException(HUBSPOT_CONTACT_CREATE_ERROR);
     }
 }

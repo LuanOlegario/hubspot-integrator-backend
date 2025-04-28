@@ -1,4 +1,4 @@
-package br.com.meetime.hubspotintegrator.config;
+package br.com.meetime.hubspotintegrator.util;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

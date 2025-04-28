@@ -2,13 +2,13 @@ package br.com.meetime.hubspotintegrator.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @Configuration
-public class WebClientConfig {
+public class RestClientConfig {
 
     @Bean
-    public WebClient webClient() {
-        return WebClient.create();
+    public RestClient restClient() {
+        return RestClient.create();
     }
 }

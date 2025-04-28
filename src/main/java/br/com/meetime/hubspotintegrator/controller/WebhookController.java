@@ -1,7 +1,7 @@
 package br.com.meetime.hubspotintegrator.controller;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
-import br.com.meetime.hubspotintegrator.config.HubspotSignatureValidator;
+import br.com.meetime.hubspotintegrator.util.HubspotSignatureValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

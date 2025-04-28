@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Mono;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +27,7 @@ import static br.com.meetime.hubspotintegrator.constants.Constants.*;
 public class OAuthService {
 
     private final HubspotProperties hubspotProperties;
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     private final Map<String, String> refreshTokenStore = new ConcurrentHashMap<>();
     private final Map<String, String> accessTokenCache = new ConcurrentHashMap<>();
@@ -56,7 +56,7 @@ public class OAuthService {
     public TokenResponseDto refreshAccessToken(HttpSession session) {
         String refresh = refreshTokenStore.get(session.getId());
         if (refresh == null) {
-            throw new HubSpotAuthorizationException("Refresh token não encontrado para esta sessão.");
+            throw new HubSpotAuthorizationException(HUBSPOT_REFRESH_TOKEN_NOT_FOUND);
         }
 
         String body = buildRefreshTokenBody(refresh);
@@ -80,17 +80,16 @@ public class OAuthService {
     }
 
     private String sendTokenRequest(String body) {
-        return webClient.post()
-                .uri(hubspotProperties.getTokenUrl())
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .bodyValue(body)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response ->
-                        response.bodyToMono(String.class)
-                                .flatMap(errorBody -> Mono.error(new HubSpotApiException("Erro ao comunicar com HubSpot: " + errorBody)))
-                )
-                .bodyToMono(String.class)
-                .block();
+        try {
+            return restClient.post()
+                    .uri(hubspotProperties.getTokenUrl())
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                    .body(body)
+                    .retrieve()
+                    .body(String.class);
+        } catch (Exception ex) {
+            throw new HubSpotApiException(HUBSPOT_COMMUNICATION_ERROR + ex.getMessage());
+        }
     }
 
     private TokenResponseDto parseAndStoreTokens(String response, HttpSession session) {
@@ -113,17 +112,17 @@ public class OAuthService {
 
             return new TokenResponseDto(accessToken, refreshToken, expiresIn);
         } catch (Exception e) {
-            throw new HubSpotApiException("Erro ao processar resposta do HubSpot");
+            throw new HubSpotApiException(HUBSPOT_RESPONSE_ERROR);
         }
     }
 
     public String getValidAccessToken(HttpSession session) {
-        String accessToken = (String) session.getAttribute("accessToken");
-        String refreshToken = (String) session.getAttribute("refreshToken");
+        String accessToken = (String) session.getAttribute(ACCESS_TOKEN);
+        String refreshToken = (String) session.getAttribute(REFRESH_TOKEN);
         Instant expiration = accessTokenExpirationCache.get(session.getId());
 
         if (accessToken == null || refreshToken == null) {
-            throw new HubSpotAuthorizationException("Tokens não encontrados na sessão.");
+            throw new HubSpotAuthorizationException(HUBSPOT_AUTH_ERROR);
         }
 
         if (expiration != null && expiration.isBefore(Instant.now())) {
@@ -131,7 +130,7 @@ public class OAuthService {
                 TokenResponseDto refreshedTokens = refreshAccessToken(session);
                 return refreshedTokens.accessToken();
             } catch (Exception ex) {
-                throw new HubSpotAuthorizationException("Falha ao renovar o Access Token: " + ex.getMessage());
+                throw new HubSpotAuthorizationException(HUBSPOT_REFRESH_ERROR + ex.getMessage());
             }
         }
         return accessToken;
