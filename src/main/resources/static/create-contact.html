@@ -5,58 +5,60 @@
     <title>Criar Contato</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
             padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
         }
 
         h1 {
-            text-align: center;
             color: #333;
         }
 
         form {
-            display: flex;
-            flex-direction: column;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
         }
 
         label {
-            font-size: 14px;
-            margin-bottom: 6px;
+            font-weight: bold;
             color: #555;
+            display: block;
+            margin-bottom: 5px;
         }
 
-        input[type="text"], input[type="email"] {
-            padding: 10px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        input[type="text"],
+        input[type="email"],
+        select {
             width: 100%;
+            padding: 10px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
         }
 
-        input[type="text"]:focus, input[type="email"]:focus {
-            border-color: #007bff;
-            outline: none;
+        input.invalid {
+            border-color: red;
         }
 
         button {
-            padding: 12px;
-            font-size: 16px;
-            color: #fff;
             background-color: #007bff;
+            color: white;
+            padding: 12px;
+            width: 100%;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
@@ -65,56 +67,229 @@
             background-color: #0056b3;
         }
 
-        .response {
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        button:disabled:hover {
+            background-color: #ccc;
+        }
+
+        #response {
             margin-top: 20px;
             text-align: center;
+            font-weight: bold;
+            color: red;
         }
+
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -15px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        .modal-footer {
+            text-align: right;
+        }
+
+        .ok-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .ok-button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Cadastro de Novo Contato</h1>
+<h1>Cadastro de Novo Contato</h1>
 
-    <form id="contactForm">
-        <label for="firstname">Nome:</label>
-        <input type="text" id="firstname" name="firstname" required>
+<form id="contactForm">
+    <label for="firstname">Nome:</label>
+    <input type="text" id="firstname" name="firstname" required>
 
-        <label for="lastname">Sobrenome:</label>
-        <input type="text" id="lastname" name="lastname" required>
+    <label for="lastname">Sobrenome:</label>
+    <input type="text" id="lastname" name="lastname" required>
 
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" required>
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" name="email" required>
+    <div id="email-error" class="error-message hidden"></div>
 
-        <label for="phone">Telefone:</label>
-        <input type="text" id="phone" name="phone">
+    <label for="phone">Telefone:</label>
+    <input type="text" id="phone" name="phone">
 
-        <label for="company">Empresa:</label>
-        <input type="text" id="company" name="company">
+    <label for="company">Empresa:</label>
+    <input type="text" id="company" name="company">
 
-        <label for="website">Website:</label>
-        <input type="text" id="website" name="website">
+    <label for="website">Website:</label>
+    <input type="text" id="website" name="website">
 
-        <button type="submit">Criar Contato</button>
-    </form>
+    <label for="lifecycleStage">Fase do Ciclo de Vida:</label>
+    <select id="lifecycleStage" name="lifecycleStage" required>
+        <option value="subscriber">Assinante</option>
+        <option value="lead">Lead</option>
+        <option value="marketingqualifiedlead">Lead qualificado de marketing</option>
+        <option value="salesqualifiedlead">Lead qualificado de vendas</option>
+        <option value="opportunity">Oportunidade</option>
+        <option value="customer">Cliente</option>
+        <option value="other">Outro</option>
+    </select>
 
-    <div id="response" class="response"></div>
+    <button type="submit" id="createContactButton" disabled>Criar Contato</button>
+</form>
+
+<div id="response" class="hidden"></div>
+
+<div id="errorModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Mensagem</h2>
+            <span class="close-button">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="modalErrorMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="ok-button" id="modalOkButton">OK</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    document.getElementById('contactForm').addEventListener('submit', function (event) {
+    const contactForm = document.getElementById('contactForm');
+    const emailInput = document.getElementById('email');
+    const createContactButton = document.getElementById('createContactButton');
+    const responseDiv = document.getElementById('response');
+    const emailErrorDiv = document.getElementById('email-error');
+
+    const modal = document.getElementById('errorModal');
+    const modalCloseButton = document.querySelector('.close-button');
+    const modalOkButton = document.getElementById('modalOkButton');
+    const modalErrorMessage = document.getElementById('modalErrorMessage');
+
+    function handleEmailInput() {
+        const emailValue = emailInput.value;
+        if (emailValue) {
+            emailInput.classList.remove('invalid');
+            createContactButton.disabled = false;
+            emailErrorDiv.classList.add('hidden');
+            responseDiv.classList.add('hidden');
+        } else {
+            emailInput.classList.add('invalid');
+            createContactButton.disabled = true;
+            emailErrorDiv.classList.remove('hidden');
+            emailErrorDiv.textContent = 'Por favor, insira um e-mail válido.';
+            responseDiv.classList.add('hidden');
+        }
+    }
+
+    emailInput.addEventListener('input', handleEmailInput);
+
+    contactForm.addEventListener('submit', function (event) {
         event.preventDefault();
+
+        if (createContactButton.disabled) {
+            return;
+        }
 
         const data = {
             properties: {
-                email: document.getElementById('email').value,
+                email: emailInput.value,
                 firstname: document.getElementById('firstname').value,
                 lastname: document.getElementById('lastname').value,
                 phone: document.getElementById('phone').value,
                 company: document.getElementById('company').value,
-                website: document.getElementById('website').value
+                website: document.getElementById('website').value,
+                lifecyclestage: document.getElementById('lifecycleStage').value
             }
         };
+        responseDiv.classList.remove('hidden');
+        responseDiv.innerText = 'Enviando...';
 
         fetch('/api/contacts/create', {
             method: 'POST',
@@ -124,15 +299,51 @@
             body: JSON.stringify(data),
             credentials: 'include'
         })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('response').innerHTML = 'Contato criado com sucesso!';
-                document.getElementById('contactForm').reset();
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        let errorMessage = 'Erro ao criar contato: ';
+                        if (errorData.message) {
+                            errorMessage += errorData.message;
+                        } else {
+                            errorMessage += 'Já existe um contato com o e-mail informado.';
+                        }
+                        throw new Error(errorMessage);
+                    });
+                }
+                return response.json();
+            })
+            .then(result => {
+                responseDiv.innerText = '';
+                modalErrorMessage.textContent = 'Contato criado com sucesso!';
+                modal.style.display = "block";
+                contactForm.reset();
+                createContactButton.disabled = true;
+                emailInput.classList.remove('invalid');
+                emailErrorDiv.classList.add('hidden');
             })
             .catch(error => {
-                document.getElementById('response').innerHTML = 'Erro ao criar contato. Tente novamente.';
+                responseDiv.innerText = '';
+                responseDiv.style.color = 'red';
+                modalErrorMessage.textContent = error.message;
+                modal.style.display = "block";
             });
     });
+
+    modalCloseButton.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    modalOkButton.onclick = function() {
+        modal.style.display = "none";
+    };
+
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    };
+
 </script>
 
 <span id="access-token" style="display:none;">${accessToken}</span>

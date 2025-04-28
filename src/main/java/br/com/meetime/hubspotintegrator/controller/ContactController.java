@@ -4,6 +4,7 @@ import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
 import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
 import br.com.meetime.hubspotintegrator.service.ContactService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class ContactController {
     private final ContactService contactService;
 
     @PostMapping(value = "/create")
-    public ResponseEntity<ContactResponseDto> createContact(@RequestBody CreateContactDto createContactDto, HttpSession session) {
+    public ResponseEntity<ContactResponseDto> createContact(@RequestBody @Valid CreateContactDto createContactDto, HttpSession session) {
         ContactResponseDto contactResponse = contactService.createContact(createContactDto, session);
         return ResponseEntity.status(HttpStatus.CREATED).body(contactResponse);
     }
