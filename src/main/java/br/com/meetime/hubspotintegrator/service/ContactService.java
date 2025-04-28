@@ -30,8 +30,6 @@ public class ContactService {
 
     @RateLimiter(name = "hubspotApi")
     public ContactResponseDto createContact(CreateContactDto createContactDto, HttpSession session) {
-        log.info("ID da sessão no ContactService (createContact): {}", session.getId());
-
         try {
             String accessToken = OAuthService.getValidAccessToken(session);
             ContactResponseDto response = webClient.post()

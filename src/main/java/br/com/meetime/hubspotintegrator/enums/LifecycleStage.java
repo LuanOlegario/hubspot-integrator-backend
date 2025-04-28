@@ -14,10 +14,15 @@ public enum LifecycleStage {
     OTHER("other");
 
     private final String value;
-    LifecycleStage(String value) { this.value = value; }
+
+    LifecycleStage(String value) {
+        this.value = value;
+    }
 
     @JsonValue
-    public String getValue() { return value; }
+    public String getValue() {
+        return value;
+    }
 
     @JsonCreator
     public static LifecycleStage fromValue(String value) {

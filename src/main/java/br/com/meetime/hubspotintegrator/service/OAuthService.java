@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-        import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -133,4 +133,5 @@ public class OAuthService {
             }
         }
         return accessToken;
-    }}
+    }
+}
