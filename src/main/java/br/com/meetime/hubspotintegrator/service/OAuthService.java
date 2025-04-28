@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
-import org.springframework.stereotype.Service;
+        import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -52,12 +52,12 @@ public class OAuthService {
     }
 
     public TokenResponseDto refreshAccessToken(HttpSession session) {
-        String refreshToken = refreshTokenStore.get(session.getId());
-        if (refreshToken == null) {
+        String refresh = refreshTokenStore.get(session.getId());
+        if (refresh == null) {
             throw new HubSpotAuthorizationException("Refresh token não encontrado para esta sessão.");
         }
 
-        String body = buildRefreshTokenBody(refreshToken);
+        String body = buildRefreshTokenBody(refresh);
         String response = sendTokenRequest(body);
         return parseAndStoreTokens(response, session);
     }
@@ -115,21 +115,22 @@ public class OAuthService {
         }
     }
 
-    public boolean isAccessTokenExpired(String sessionUserId) {
-        Instant expirationTime = accessTokenExpirationCache.get(sessionUserId);
-        return expirationTime != null && Instant.now().isAfter(expirationTime);
-    }
-
     public String getValidAccessToken(HttpSession session) {
-        String accessToken = accessTokenCache.get(session.getId());
+        String accessToken = (String) session.getAttribute("accessToken");
+        String refreshToken = (String) session.getAttribute("refreshToken");
+        Instant expiration = accessTokenExpirationCache.get(session.getId());
 
-        if (accessToken == null) {
-            throw new HubSpotAuthorizationException("Access Token não encontrado para esta sessão.");
+        if (accessToken == null || refreshToken == null) {
+            throw new HubSpotAuthorizationException("Tokens não encontrados na sessão.");
         }
 
-        if (isAccessTokenExpired(session.getId())) {
-            return refreshAccessToken(session).accessToken();
+        if (expiration != null && expiration.isBefore(Instant.now())) {
+            try {
+                TokenResponseDto refreshedTokens = refreshAccessToken(session);
+                return refreshedTokens.accessToken();
+            } catch (Exception ex) {
+                throw new HubSpotAuthorizationException("Falha ao renovar o Access Token: " + ex.getMessage());
+            }
         }
         return accessToken;
-    }
-}
+    }}

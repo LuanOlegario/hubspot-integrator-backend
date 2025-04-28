@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.result.view.RedirectView;
 
 import java.io.IOException;
 
@@ -19,17 +18,18 @@ public class OAuthController {
     private final OAuthService OAuthService;
 
     @GetMapping("/authorize")
-    public RedirectView getAuthorizationUrl() {
+    public void getAuthorizationUrl(HttpServletResponse response) throws IOException {
         String authorizationUrl = OAuthService.generateAuthorizationUrl();
         log.info("Redirecionando para autorização do HubSpot: {}", authorizationUrl);
-        return new RedirectView(authorizationUrl);
+        response.sendRedirect(authorizationUrl);
     }
 
     @GetMapping("/callback")
     public void handleCallback(@RequestParam("code") String code,
                                HttpSession session, HttpServletResponse response) throws IOException {
         OAuthService.exchangeCodeForToken(code, session);
-        log.info("Usuário autenticado com sucesso no HubSpot.");
+        String accessToken = (String) session.getAttribute("accessToken");
+        log.info("Usuário autenticado com sucesso no HubSpot. Access Token: {}", accessToken);
         response.sendRedirect("/create-contact.html");
     }
 }

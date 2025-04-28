@@ -1,58 +1,135 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Criar Contato</title>
+    <meta charset="UTF-8">
+    <title>Criar Contato</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #response {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
+
 <h1>Cadastro de Novo Contato</h1>
 
 <form id="contactForm">
-  <label for="firstname">Nome:</label><br>
-  <input type="text" id="firstname" name="firstname" required><br><br>
+    <label for="firstname">Nome:</label>
+    <input type="text" id="firstname" name="firstname" required>
 
-  <label for="lastname">Sobrenome:</label><br>
-  <input type="text" id="lastname" name="lastname" required><br><br>
+    <label for="lastname">Sobrenome:</label>
+    <input type="text" id="lastname" name="lastname" required>
 
-  <label for="email">E-mail:</label><br>
-  <input type="email" id="email" name="email" required><br><br>
+    <label for="email">E-mail:</label>
+    <input type="email" id="email" name="email" required>
 
-  <button type="submit">Criar Contato</button>
+    <label for="phone">Telefone:</label>
+    <input type="text" id="phone" name="phone">
+
+    <label for="company">Empresa:</label>
+    <input type="text" id="company" name="company">
+
+    <label for="website">Website:</label>
+    <input type="text" id="website" name="website">
+
+    <button type="submit">Criar Contato</button>
 </form>
 
 <div id="response"></div>
 
 <script>
-  document.getElementById('contactForm').addEventListener('submit', function (event) {
-    event.preventDefault();
+    document.getElementById('contactForm').addEventListener('submit', function (event) {
+        event.preventDefault();
 
-    const data = {
-      firstname: document.getElementById('firstname').value,
-      lastname: document.getElementById('lastname').value,
-      email: document.getElementById('email').value
-    };
+        const data = {
+            properties: {
+                email: document.getElementById('email').value,
+                firstname: document.getElementById('firstname').value,
+                lastname: document.getElementById('lastname').value,
+                phone: document.getElementById('phone').value,
+                company: document.getElementById('company').value,
+                website: document.getElementById('website').value
+            }
+        };
 
-    fetch('/api/contacts/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error('Erro ao criar o contato');
-              }
-              return response.json();
-            })
-            .then(data => {
-              document.getElementById('response').innerHTML = "<p>Contato criado com sucesso!</p>";
+        fetch('/api/contacts/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(result => {
+                document.getElementById('response').innerText = 'Contato criado com sucesso!';
+                document.getElementById('contactForm').reset();
             })
             .catch(error => {
-              console.error(error);
-              document.getElementById('response').innerHTML = "<p>Erro ao criar contato.</p>";
+                document.getElementById('response').innerText = 'Erro ao criar contato.';
+                console.error('Erro:', error);
             });
-  });
+    });
 </script>
+
+<span id="access-token" style="display:none;">${accessToken}</span>
+
 </body>
 </html>

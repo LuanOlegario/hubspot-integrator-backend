@@ -8,6 +8,7 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,13 +24,16 @@ public class ContactService {
     private final OAuthService OAuthService;
     private final WebClient webClient;
 
+    @Value( "${hubspot.url.contacts}")
+    private String urlContacts;
+
     @RateLimiter(name = "hubspotApi")
     public ContactResponseDto createContact(CreateContactDto createContactDto, HttpSession session) {
+        log.info("ID da sessão no ContactService (createContact): {}", session.getId());
         try {
             String accessToken = OAuthService.getValidAccessToken(session);
-
             ContactResponseDto response = webClient.post()
-                    .uri("/crm/v3/objects/contacts")
+                    .uri(urlContacts)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                     .contentType(MediaType.APPLICATION_JSON)
                     .bodyValue(createContactDto)

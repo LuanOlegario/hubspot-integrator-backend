@@ -19,9 +19,10 @@ public class ContactController {
 
     private final ContactService contactService;
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create")
     public ResponseEntity<ContactResponseDto> createContact(@RequestBody CreateContactDto createContactDto, HttpSession session) {
         ContactResponseDto contactResponse = contactService.createContact(createContactDto, session);
         return ResponseEntity.status(HttpStatus.CREATED).body(contactResponse);
     }
 }
+
