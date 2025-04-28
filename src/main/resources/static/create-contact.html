@@ -5,94 +5,101 @@
     <title>Criar Contato</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f6f8;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
             margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
             padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
 
         h1 {
+            text-align: center;
             color: #333;
         }
 
         form {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         label {
-            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
             color: #555;
         }
 
-        input[type="text"],
-        input[type="email"] {
-            width: 100%;
+        input[type="text"], input[type="email"] {
             padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 20px;
+            font-size: 16px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus {
+            border-color: #007bff;
+            outline: none;
         }
 
         button {
-            background-color: #007bff;
-            color: white;
             padding: 12px;
-            width: 100%;
-            border: none;
-            border-radius: 5px;
             font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
             background-color: #0056b3;
         }
 
-        #response {
+        .response {
             margin-top: 20px;
             text-align: center;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<h1>Cadastro de Novo Contato</h1>
+<div class="container">
+    <h1>Cadastro de Novo Contato</h1>
 
-<form id="contactForm">
-    <label for="firstname">Nome:</label>
-    <input type="text" id="firstname" name="firstname" required>
+    <form id="contactForm">
+        <label for="firstname">Nome:</label>
+        <input type="text" id="firstname" name="firstname" required>
 
-    <label for="lastname">Sobrenome:</label>
-    <input type="text" id="lastname" name="lastname" required>
+        <label for="lastname">Sobrenome:</label>
+        <input type="text" id="lastname" name="lastname" required>
 
-    <label for="email">E-mail:</label>
-    <input type="email" id="email" name="email" required>
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
 
-    <label for="phone">Telefone:</label>
-    <input type="text" id="phone" name="phone">
+        <label for="phone">Telefone:</label>
+        <input type="text" id="phone" name="phone">
 
-    <label for="company">Empresa:</label>
-    <input type="text" id="company" name="company">
+        <label for="company">Empresa:</label>
+        <input type="text" id="company" name="company">
 
-    <label for="website">Website:</label>
-    <input type="text" id="website" name="website">
+        <label for="website">Website:</label>
+        <input type="text" id="website" name="website">
 
-    <button type="submit">Criar Contato</button>
-</form>
+        <button type="submit">Criar Contato</button>
+    </form>
 
-<div id="response"></div>
+    <div id="response" class="response"></div>
+</div>
 
 <script>
     document.getElementById('contactForm').addEventListener('submit', function (event) {
@@ -118,13 +125,12 @@
             credentials: 'include'
         })
             .then(response => response.json())
-            .then(result => {
-                document.getElementById('response').innerText = 'Contato criado com sucesso!';
+            .then(data => {
+                document.getElementById('response').innerHTML = 'Contato criado com sucesso!';
                 document.getElementById('contactForm').reset();
             })
             .catch(error => {
-                document.getElementById('response').innerText = 'Erro ao criar contato.';
-                console.error('Erro:', error);
+                document.getElementById('response').innerHTML = 'Erro ao criar contato. Tente novamente.';
             });
     });
 </script>

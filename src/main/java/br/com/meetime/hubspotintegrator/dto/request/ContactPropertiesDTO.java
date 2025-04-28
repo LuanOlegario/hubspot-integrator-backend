@@ -6,7 +6,6 @@ public record ContactPropertiesDTO(
         String lastname,
         String phone,
         String company,
-        String website,
-        String lifecycleStage
+        String website
 ) {
 }
