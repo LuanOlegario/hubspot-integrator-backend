@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static br.com.meetime.hubspotintegrator.constants.Constants.*;
+
 @Service
 @RequiredArgsConstructor
 public class OAuthService {
@@ -96,18 +98,18 @@ public class OAuthService {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode json = mapper.readTree(response);
 
-            String accessToken = json.get("access_token").asText();
-            String refreshToken = json.has("refresh_token")
-                    ? json.get("refresh_token").asText()
+            String accessToken = json.get(ACCESS_TOKEN).asText();
+            String refreshToken = json.has(REFRESH_TOKEN)
+                    ? json.get(REFRESH_TOKEN).asText()
                     : refreshTokenStore.get(session.getId());
 
             accessTokenCache.put(session.getId(), accessToken);
             refreshTokenStore.put(session.getId(), refreshToken);
 
-            int expiresIn = json.get("expires_in").asInt();
+            int expiresIn = json.get(EXPIRES_IN).asInt();
             accessTokenExpirationCache.put(session.getId(), Instant.now().plusSeconds(expiresIn));
-            session.setAttribute("accessToken", accessToken);
-            session.setAttribute("refreshToken", refreshToken);
+            session.setAttribute(ACCESS_TOKEN, accessToken);
+            session.setAttribute(REFRESH_TOKEN, refreshToken);
 
             return new TokenResponseDto(accessToken, refreshToken, expiresIn);
         } catch (Exception e) {
