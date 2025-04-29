@@ -1,12 +1,19 @@
 package br.com.meetime.hubspotintegrator.controller;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
+import br.com.meetime.hubspotintegrator.dto.response.HubspotWebhookEventDto;
 import br.com.meetime.hubspotintegrator.util.HubspotSignatureValidator;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static br.com.meetime.hubspotintegrator.constants.Constants.CONTACT_CREATION_OK;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,15 +22,34 @@ import org.springframework.web.bind.annotation.*;
 public class WebhookController {
 
     private final HubspotProperties hubspotProperties;
+    private final ObjectMapper objectMapper;
 
     @PostMapping
-    public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature") String signature,
+    public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature-V3") String signature,
                                                  @RequestBody String requestBody) {
         log.info("Recebido webhook: {}", requestBody);
+
         if (!HubspotSignatureValidator.isValid(signature, requestBody, hubspotProperties.getClientSecret())) {
+            log.warn("Assinatura inválida recebida no webhook.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Assinatura inválida.");
         }
 
-        return ResponseEntity.ok(requestBody + "Webhook processado com sucesso.");
+        try {
+            List<HubspotWebhookEventDto> events = objectMapper.readValue(
+                    requestBody,
+                    new TypeReference<List<HubspotWebhookEventDto>>() {}
+            );
+
+            events.stream()
+                    .filter(event -> CONTACT_CREATION_OK.equalsIgnoreCase(event.subscriptionType()))
+                    .forEach(event -> {
+                        log.info("Contato criado. ID: {}, Email: {}", event.objectId(), event.propertyValue());
+                    });
+
+            return ResponseEntity.ok("Eventos de criação de contato processados com sucesso.");
+        } catch (Exception e) {
+            log.error("Erro ao processar webhook: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao processar o webhook.");
+        }
     }
 }

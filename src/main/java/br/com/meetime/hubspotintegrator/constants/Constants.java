@@ -6,6 +6,8 @@ public class Constants {
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String EXPIRES_IN = "expires_in";
+    public static final String HUBSPOT_CLIENT_REGISTRATION_ID = "hubspot";
+    public static final String HUBSPOT_PRINCIPAL_NAME = "hubspot-client";
 
     // Rate Limiting
     public static final String HUBSPOT_API_RATE_LIMITER = "hubspotApi";

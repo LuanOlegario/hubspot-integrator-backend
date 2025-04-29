@@ -276,7 +276,7 @@
         if (createContactButton.disabled) {
             return;
         }
-
+        const accessToken = document.getElementById('access-token').textContent;
         const data = {
             properties: {
                 email: emailInput.value,
@@ -295,6 +295,8 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+
             },
             body: JSON.stringify(data),
             credentials: 'include'

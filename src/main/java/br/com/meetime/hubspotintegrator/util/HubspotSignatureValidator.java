@@ -1,17 +1,18 @@
 package br.com.meetime.hubspotintegrator.util;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Base64;
 
 public class HubspotSignatureValidator {
+
     public static boolean isValid(String signature, String requestBody, String clientSecret) {
         try {
-            String algorithm = "HmacSHA256";
-            Mac hasher = Mac.getInstance(algorithm);
-            hasher.init(new SecretKeySpec(clientSecret.getBytes(), algorithm));
+            String combined = clientSecret + requestBody;
 
-            byte[] hash = hasher.doFinal(requestBody.getBytes());
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(combined.getBytes(StandardCharsets.UTF_8));
+
             String expectedSignature = Base64.getEncoder().encodeToString(hash);
 
             return expectedSignature.equals(signature);
@@ -20,4 +21,3 @@ public class HubspotSignatureValidator {
         }
     }
 }
-

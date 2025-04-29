@@ -2,6 +2,7 @@ package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
 import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
+import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
 import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotBadRequestException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotRateLimitExceededException;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import static br.com.meetime.hubspotintegrator.constants.Constants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,33 +30,36 @@ public class ContactService {
     @Value("${hubspot.url.contacts}")
     private String urlContacts;
 
-    @RateLimiter(name = HUBSPOT_API_RATE_LIMITER)
-    public ContactResponseDto createContact(CreateContactDto createContactDto, HttpSession session) {
+    @RateLimiter(name = "hubspot-api-rate-limiter")
+    public ContactResponseDto createContact(CreateContactDto createContactDto, String acessToken) {
         try {
-            String accessToken = oAuthService.getValidAccessToken(session);
-
             ContactResponseDto response = restClient.post()
                     .uri(urlContacts)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + acessToken) //todo e colocar interceptador
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(createContactDto)
                     .retrieve()
                     .body(ContactResponseDto.class);
 
-            log.info("Contato criado com sucesso no HubSpot: {}", response);
             return response;
         } catch (HttpClientErrorException e) {
-            log.error("Erro ao criar contato no HubSpot: Status {} - Body {}", e.getStatusCode(), e.getResponseBodyAsString(), e);
-
-            if (e.getStatusCode().value() == HttpStatus.TOO_MANY_REQUESTS.value()) {
-                throw new HubSpotRateLimitExceededException(HUBSPOT_RATE_LIMIT_ERROR_MESSAGE);
+            if (e.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
+                throw new HubSpotRateLimitExceededException("Limite de requisições excedido.");
             }
 
-            if (e.getStatusCode().value() == HttpStatus.CONFLICT.value()) {
-                log.warn("Tentativa de criar contato duplicado no HubSpot. Email: {}", createContactDto.properties().email());
-                throw new HubSpotBadRequestException(HUBSPOT_CONTACT_CONFLICT);
+            if (e.getStatusCode().equals(HttpStatus.CONFLICT)) {
+                throw new HubSpotBadRequestException("Erro de conflito ao criar contato.");
             }
+
+            throw new HubSpotApiException("Erro na API do HubSpot: " + e.getMessage());
         }
-        throw new HubSpotApiException(HUBSPOT_CONTACT_CREATE_ERROR);
     }
 }
+
+
+
+
+
+
+
+
