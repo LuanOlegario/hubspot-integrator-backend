@@ -1,5 +1,6 @@
 package br.com.meetime.hubspotintegrator.controller;
 
+import br.com.meetime.hubspotintegrator.documentation.OAuthApiDoc;
 import br.com.meetime.hubspotintegrator.service.OAuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/oauth")
-public class OAuthController {
+public class OAuthController implements OAuthApiDoc {
 
     private final OAuthService oAuthService;
 

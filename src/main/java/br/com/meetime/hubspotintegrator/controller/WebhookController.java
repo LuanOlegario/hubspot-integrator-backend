@@ -1,6 +1,7 @@
 package br.com.meetime.hubspotintegrator.controller;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
+import br.com.meetime.hubspotintegrator.documentation.WebhookApiDoc;
 import br.com.meetime.hubspotintegrator.dto.response.HubspotWebhookEventDto;
 import br.com.meetime.hubspotintegrator.util.HubspotSignatureValidator;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,7 +18,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/webhook")
-public class WebhookController {
+public class WebhookController implements WebhookApiDoc {
 
     private final HubspotProperties hubspotProperties;
     private final ObjectMapper objectMapper;
