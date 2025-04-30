@@ -144,8 +144,8 @@ Este projeto foi construído com atenção a boas práticas, clareza de código 
 ---
 
 **Desenvolvido por:** Luan Olegario
-Contato: luanm.olegario@outlook.com
-Linkedin: https://www.linkedin.com/in/luan-olegario
+- Contato: luanm.olegario@outlook.com
+- Linkedin: https://www.linkedin.com/in/luan-olegario
 
 > GPT foi usado como apoio na documentação e sugestões, mas todas as decisões técnicas e implementações são autorais.
 
