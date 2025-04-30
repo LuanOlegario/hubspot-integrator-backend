@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class OAuthService {
 
-
     private final HubspotProperties hubspotProperties;
     private final RestClient restClient;
 

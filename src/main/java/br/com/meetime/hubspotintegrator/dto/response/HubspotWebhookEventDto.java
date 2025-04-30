@@ -1,13 +1,15 @@
 package br.com.meetime.hubspotintegrator.dto.response;
 
 public record HubspotWebhookEventDto(
-        String eventId,
-        String subscriptionType,
-        String objectId,
+        long appId,
+        long eventId,
+        Long subscriptionId,
+        Long portalId,
         Long occurredAt,
+        String subscriptionType,
+        Integer attemptNumber,
+        Long objectId,
         String changeSource,
-        String eventType,
-        String propertyName,
-        String propertyValue
+        String changeFlag
 ) {
 }

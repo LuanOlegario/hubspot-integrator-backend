@@ -2,12 +2,10 @@ package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
 import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
-import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
 import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotBadRequestException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotRateLimitExceededException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

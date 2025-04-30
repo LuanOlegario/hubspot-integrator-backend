@@ -15,9 +15,9 @@ import java.util.List;
 
 import static br.com.meetime.hubspotintegrator.constants.Constants.CONTACT_CREATION_OK;
 
-@RestController
 @RequiredArgsConstructor
 @Slf4j
+@RestController
 @RequestMapping("/api/webhook")
 public class WebhookController {
 
@@ -25,11 +25,13 @@ public class WebhookController {
     private final ObjectMapper objectMapper;
 
     @PostMapping
-    public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature-V3") String signature,
+    public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature") String signature,
                                                  @RequestBody String requestBody) {
         log.info("Recebido webhook: {}", requestBody);
 
-        if (!HubspotSignatureValidator.isValid(signature, requestBody, hubspotProperties.getClientSecret())) {
+        boolean isValid = HubspotSignatureValidator.isValid(signature, requestBody, hubspotProperties.getClientSecret(), "v1");
+
+        if (!isValid) {
             log.warn("Assinatura inválida recebida no webhook.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Assinatura inválida.");
         }
@@ -37,13 +39,14 @@ public class WebhookController {
         try {
             List<HubspotWebhookEventDto> events = objectMapper.readValue(
                     requestBody,
-                    new TypeReference<List<HubspotWebhookEventDto>>() {}
+                    new TypeReference<List<HubspotWebhookEventDto>>() {
+                    }
             );
 
             events.stream()
                     .filter(event -> CONTACT_CREATION_OK.equalsIgnoreCase(event.subscriptionType()))
                     .forEach(event -> {
-                        log.info("Contato criado. ID: {}, Email: {}", event.objectId(), event.propertyValue());
+                        log.info("Contato criado. ID: {}, Email: {}", event.objectId());
                     });
 
             return ResponseEntity.ok("Eventos de criação de contato processados com sucesso.");
