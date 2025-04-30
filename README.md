@@ -51,10 +51,10 @@ Clone o projeto e rode:
 
 ## 🔐 Autenticação OAuth 2.0
 
-Para iniciar o fluxo de autenticação com o HubSpot, acesse:
+Para iniciar o fluxo de autenticação com o HubSpot, rode a aplicação em localhoost, acesse o browser de seu navegador com o endereço:
 
 ```
-GET http://localhost:8080/api/oauth/authorization
+http://localhost:8080/api/oauth/authorization
 ```
 
 Você será redirecionado para o consentimento do HubSpot. Após autorizar, será redirecionado de volta ao callback que troca o `code` por um `access_token`.
