@@ -148,3 +148,8 @@ Contato: luanm.olegario@outlook.com
 Linkedin: https://www.linkedin.com/in/luan-olegario
 
 > GPT foi usado como apoio na documentação e sugestões, mas todas as decisões técnicas e implementações são autorais.
+
+
+## ✍️ Git
+
+> Para todas as pessoas que desejarem contribuir com o projeto, deverão criar uma nova branch para suas alterações. Os commits diretamente na branch main não serão aceitos e todas as contribuições passarão por avaliação antes de serem incorporadas ao projeto.
