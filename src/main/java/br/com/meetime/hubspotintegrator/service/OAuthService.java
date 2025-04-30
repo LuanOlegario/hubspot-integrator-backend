@@ -3,11 +3,11 @@ package br.com.meetime.hubspotintegrator.service;
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
 import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
 import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
-import br.com.meetime.hubspotintegrator.exception.HubSpotAuthorizationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -17,8 +17,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @Slf4j
@@ -26,9 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OAuthService {
 
     private final HubspotProperties hubspotProperties;
-    private final RestClient restClient;
+    private final TokenStoreService tokenStore;
+    @Qualifier("authRestClient")
+    private final RestClient authRestClient;
 
-    public static final ConcurrentHashMap<String, TokenResponseDto> tokenStore = new ConcurrentHashMap<>();
 
     public String generateAuthorizationUrl() {
         String scopes = hubspotProperties.getScope();
@@ -50,7 +49,6 @@ public class OAuthService {
         return parseAndStoreTokens(response);
     }
 
-
     private String buildAuthorizationCodeBody(String code) {
         return "grant_type=authorization_code" +
                 "&client_id=" + URLEncoder.encode(hubspotProperties.getClientId(), StandardCharsets.UTF_8) +
@@ -61,12 +59,13 @@ public class OAuthService {
 
     private String sendTokenRequest(String body) {
         try {
-            return restClient.post()
+            return authRestClient.post()
                     .uri(hubspotProperties.getTokenUrl())
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                     .body(body)
                     .retrieve()
                     .body(String.class);
+
         } catch (Exception ex) {
             throw new HubSpotApiException("Erro de comunicação com o HubSpot: " + ex.getMessage());
         }
@@ -83,11 +82,18 @@ public class OAuthService {
             Instant expiration = Instant.now().plusSeconds(expiresIn);
 
             TokenResponseDto tokenResponseDto = new TokenResponseDto(accessToken, refreshToken, expiration);
-            tokenStore.put("token", tokenResponseDto);
-
+            tokenStore.store("token", tokenResponseDto);
             return tokenResponseDto;
         } catch (Exception e) {
             throw new HubSpotApiException("Erro ao processar a resposta de tokens.");
         }
+    }
+
+    public TokenResponseDto getToken() {
+        TokenResponseDto token = tokenStore.get("token");
+        if (token == null) {
+            throw new HubSpotApiException("Token de acesso ainda não foi gerado ou expirou.");
+        }
+        return token;
     }
 }

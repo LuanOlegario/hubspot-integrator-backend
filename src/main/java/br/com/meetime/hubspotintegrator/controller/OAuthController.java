@@ -25,6 +25,7 @@ public class OAuthController {
     @GetMapping("/callback")
     public void handleCallback(@RequestParam("code") String code,
                                HttpServletResponse response) throws IOException {
+        log.info("Código recebido no callback: {}", code);
         oAuthService.exchangeCodeForToken(code);
         response.sendRedirect("/create-contact.html");
     }

@@ -29,17 +29,16 @@ public class ContactService {
     private String urlContacts;
 
     @RateLimiter(name = "hubspot-api-rate-limiter")
-    public ContactResponseDto createContact(CreateContactDto createContactDto, String acessToken) {
+    public ContactResponseDto createContact(CreateContactDto createContactDto) {
         try {
             ContactResponseDto response = restClient.post()
                     .uri(urlContacts)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + acessToken) //todo e colocar interceptador
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(createContactDto)
                     .retrieve()
                     .body(ContactResponseDto.class);
-
             return response;
+
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
                 throw new HubSpotRateLimitExceededException("Limite de requisições excedido.");
