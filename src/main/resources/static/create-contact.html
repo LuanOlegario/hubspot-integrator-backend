@@ -308,7 +308,7 @@
                         if (errorData.message) {
                             errorMessage += errorData.message;
                         } else {
-                            errorMessage += 'Já existe um contato com o e-mail informado.';
+                            errorMessage += 'Ocorreu um erro inesperado, por favor verifique os logs da aplicação.';
                         }
                         throw new Error(errorMessage);
                     });

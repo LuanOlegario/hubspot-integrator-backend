@@ -17,8 +17,4 @@ public class TokenStoreService {
     public TokenResponseDto get(String key) {
         return tokenMap.get(key);
     }
-
-    public boolean contains(String key) {
-        return tokenMap.containsKey(key);
-    }
 }

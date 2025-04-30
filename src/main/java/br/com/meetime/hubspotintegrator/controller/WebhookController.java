@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static br.com.meetime.hubspotintegrator.constants.Constants.CONTACT_CREATION_OK;
-
 @RequiredArgsConstructor
 @Slf4j
 @RestController
@@ -44,7 +42,7 @@ public class WebhookController {
             );
 
             events.stream()
-                    .filter(event -> CONTACT_CREATION_OK.equalsIgnoreCase(event.subscriptionType()))
+                    .filter(event -> "CONTACT_CREATION_OK".equalsIgnoreCase(event.subscriptionType()))
                     .forEach(event -> {
                         log.info("Contato criado. ID: {}, Email: {}", event.objectId());
                     });

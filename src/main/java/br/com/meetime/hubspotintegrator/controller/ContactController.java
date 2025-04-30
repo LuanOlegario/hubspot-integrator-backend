@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 public class ContactController {
 
     private final ContactService contactService;
-    private final OAuthService oAuthService;
 
     @PostMapping("/create")
     public ResponseEntity<ContactResponseDto> createContact(@RequestBody @Valid CreateContactDto createContactDto) {
