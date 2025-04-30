@@ -154,4 +154,4 @@ Isso não era um bug da aplicação em si, mas sim uma limitação do ambiente l
 
 ## ✍️ Git
 
-> Para todas as pessoas que desejarem contribuir com o projeto, deverão criar uma nova branch para suas alterações. Os commits diretamente na branch main não serão aceitos e todas as contribuições passarão por avaliação antes de serem incorporadas ao projeto.
+> Para todas as pessoas que desejarem contribuir com o projeto, deverão criar uma nova branch para suas alterações. Os commits diretamente na branch main serão rejeitados e todas as contribuições passarão por avaliação antes de serem incorporadas ao projeto.
