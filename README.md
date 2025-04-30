@@ -103,7 +103,7 @@ Você pode visualizar os contratos da API em:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
-Para manter o código das Controllers mais limpo e organizado, foram criadas interfaces de documentação do Swagger para que entào as Controllers implementem essas interfaces.
+Para manter o código das Controllers mais limpo e organizado, foram criadas interfaces de documentação do Swagger para que então as Controllers implementem essas interfaces.
 Essa abordagem promove uma separação clara entre a lógica de negócio da Controller e a documentação da API, facilitando a manutenção e a leitura do código.
 
 ## 📦 Justificativa das dependências
