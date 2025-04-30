@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import static br.com.meetime.hubspotintegrator.constansts.HubspotConstants.SIGNATURE_HEADER;
+
 public interface WebhookApiDoc {
 
     @Operation(summary = "Recebe eventos do webhook do HubSpot")
@@ -18,6 +20,6 @@ public interface WebhookApiDoc {
             @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content = @Content)
     })
     ResponseEntity<String> receiveWebhook(
-            @RequestHeader("X-HubSpot-Signature") String signature,
+            @RequestHeader(SIGNATURE_HEADER) String signature,
             @RequestBody String requestBody);
 }

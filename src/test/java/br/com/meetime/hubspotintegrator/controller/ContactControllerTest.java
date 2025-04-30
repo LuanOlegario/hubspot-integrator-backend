@@ -7,8 +7,7 @@ import br.com.meetime.hubspotintegrator.dto.response.ContactResponsePropertiesDt
 import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
 import br.com.meetime.hubspotintegrator.enums.LifecycleStage;
 import br.com.meetime.hubspotintegrator.service.ContactService;
-import br.com.meetime.hubspotintegrator.service.OAuthService;
-import lombok.RequiredArgsConstructor;
+import br.com.meetime.hubspotintegrator.service.TokenService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 
+import static br.com.meetime.hubspotintegrator.constansts.HubspotConstants.DEFAULT_TOKEN_KEY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -33,7 +33,7 @@ class ContactControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private OAuthService oAuthService;
+    private TokenService tokenService;
 
     @MockBean
     private ContactService contactService;
@@ -46,7 +46,7 @@ class ContactControllerTest {
         );
         CreateContactDto dto = new CreateContactDto(properties);
 
-        when(oAuthService.getToken()).thenReturn(new TokenResponseDto("fake-token", null, Instant.now().plusSeconds(3600)));
+        when(tokenService.getToken(DEFAULT_TOKEN_KEY)).thenReturn(new TokenResponseDto("fake-token", null, Instant.now().plusSeconds(3600)));
 
         when(contactService.createContact(any()))
                 .thenReturn(new ContactResponseDto(

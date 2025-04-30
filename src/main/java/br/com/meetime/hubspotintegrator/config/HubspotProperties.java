@@ -17,5 +17,6 @@ public class HubspotProperties {
     private String scope;
     private String authorizationUrl;
     private String tokenUrl;
+    private String apiUrl;
 
 }

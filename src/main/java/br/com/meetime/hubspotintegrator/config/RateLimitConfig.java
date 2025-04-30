@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
 
+import static br.com.meetime.hubspotintegrator.constansts.HubspotConstants.HUBSPOT_API_RATELIMITER;
+
 @Configuration
 public class RateLimitConfig {
 
@@ -18,6 +20,6 @@ public class RateLimitConfig {
                 .timeoutDuration(Duration.ofSeconds(5))
                 .build();
 
-        return RateLimiter.of("hubspotApi", rateLimiterConfig);
+        return RateLimiter.of(HUBSPOT_API_RATELIMITER, rateLimiterConfig);
     }
 }

@@ -89,6 +89,7 @@ Implementei testes com `MockMvc`, `Mockito` e `JUnit`, cobrindo:
 - Criação de contatos com validação de payload e resposta
 - Geração da URL de autorização do OAuth
 - Casos de sucesso e falha
+- Validação de assinaturas de webhooks recebidos
 
 ```bash
 mvn test
@@ -109,7 +110,7 @@ Essa abordagem promove uma separação clara entre a lógica de negócio da Cont
 ## 📦 Justificativa das dependências
 
 ### 🌐 `RestClient`
-Escolhi o `RestClient` do Spring 6+ em vez do `RestTemplate` por ser a abordagem mais moderna, fluente e compatível com o futuro do ecossistema Spring. Ele também permite aplicar interceptadores de forma mais simples e elegante.
+Escolhi o `RestClient` do Spring 6+ em vez do `RestTemplate` por ser a abordagem mais moderna, fluente e compatível com o futuro do ecossistema Spring.
 
 ### 🔁 `Resilience4j`
 Utilizado para controle de taxa de requisição à API do HubSpot, respeitando os limites de `Rate Limit` impostos pela plataforma e tratando exceções como `429 Too Many Requests`.
@@ -123,8 +124,6 @@ Usados para simular serviços externos e garantir que as unidades funcionem corr
 ### ⚙️ Outras dependências
 - `lombok`: redução de boilerplate (getters/setters, builder, requiredArgsConstructor, etc.)
 - `spring-boot-starter-validation`: validações automáticas via `@Valid` e `jakarta.validation` (@Email, @NotEmpty, etc.)
-- `webflux`: usado como base para o `RestClient`, mesmo sem programação reativa explícita utilizei-o para configurar o interceptador.
-
 ---
 
 ---
@@ -140,6 +139,9 @@ Usados para simular serviços externos e garantir que as unidades funcionem corr
 Este projeto foi construído com atenção a boas práticas, clareza de código e tecnologias modernas do ecossistema Java. O uso de registros (`record`), interceptadores, controle de taxa, e tratamento de erros foi feito com o objetivo de criar uma base sólida e extensível.
 
 > Caso deseje rodar o webhook localmente, lembre-se de expor a porta da sua máquina com ferramentas como Ngrok.
+> Durante o desenvolvimento local de uma API integrada ao Hubspot, utilizei o Ngrok para expor meu servidor local (localhost:8080) para a internet de forma segura, permitindo que o Hubspot enviasse webhooks para o meu endpoint.
+A aplicação estava funcionando corretamente, mas depois de um tempo inativa, percebi que a conexão falhava com erros relacionados ao socket do Tomcat. Após investigar, percebi que o Ngrok (na versão gratuita) pode encerrar sessões inativas automaticamente ou perder a conectividade persistente, o que causava erros como java.net.SocketException: Invalid argument no log do Tomcat ao tentar aceitar novas conexões.
+Isso não era um bug da aplicação em si, mas sim uma limitação do ambiente local com tunelamento HTTP. Em um ambiente produtivo com um domínio e IP fixos, esse tipo de instabilidade não ocorreria.
 
 ---
 

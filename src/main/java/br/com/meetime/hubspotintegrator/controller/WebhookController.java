@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static br.com.meetime.hubspotintegrator.constansts.HubspotConstants.*;
+
 @RequiredArgsConstructor
 @Slf4j
 @RestController
@@ -23,10 +25,8 @@ public class WebhookController implements WebhookApiDoc {
     private final HubspotProperties hubspotProperties;
     private final ObjectMapper objectMapper;
 
-    public static final String CONTACT_CREATION_OK = "CONTACT_CREATION_OK";
-
     @PostMapping
-    public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature") String signature,
+    public ResponseEntity<String> receiveWebhook(@RequestHeader(SIGNATURE_HEADER) String signature,
                                                  @RequestBody String requestBody) {
         log.info("Recebido webhook: {}", requestBody);
 
@@ -34,7 +34,7 @@ public class WebhookController implements WebhookApiDoc {
 
         if (!isValid) {
             log.warn("Assinatura inválida recebida no webhook.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Assinatura inválida.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(INVALID_SIGNATURE);
         }
 
         try {
@@ -45,9 +45,9 @@ public class WebhookController implements WebhookApiDoc {
             );
 
             events.stream()
-                    .filter(event -> CONTACT_CREATION_OK.equalsIgnoreCase(event.subscriptionType()))
+                    .filter(event -> CONTACT_CREATION.equalsIgnoreCase(event.subscriptionType()))
                     .forEach(event -> {
-                        log.info("Contato criado. ID: {}, Email: {}", event.objectId());
+                        log.info("Contato criado. ID: {}", event.objectId());
                     });
 
             return ResponseEntity.ok("Eventos de criação de contato processados com sucesso.");

@@ -2,6 +2,7 @@ package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
 import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
+import br.com.meetime.hubspotintegrator.dto.response.TokenResponseDto;
 import br.com.meetime.hubspotintegrator.exception.HubSpotApiException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotBadRequestException;
 import br.com.meetime.hubspotintegrator.exception.HubSpotRateLimitExceededException;
@@ -16,39 +17,45 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import static br.com.meetime.hubspotintegrator.constansts.HubspotConstants.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ContactService {
 
-    private final OAuthService oAuthService;
+    private final TokenService tokenService;
     private final RestClient restClient;
 
     @Value("${hubspot.url.contacts}")
     private String urlContacts;
 
-    @RateLimiter(name = "hubspot-api-rate-limiter")
+    @RateLimiter(name = HUBSPOT_API_RATELIMITER)
     public ContactResponseDto createContact(CreateContactDto createContactDto) {
         try {
-            ContactResponseDto response = restClient.post()
+            TokenResponseDto token = tokenService.getValidToken();
+
+            RestClient clientWithAuth = restClient.mutate()
+                    .defaultHeader(HttpHeaders.AUTHORIZATION, BEARER_PREFIX + token.accessToken())
+                    .build();
+
+            return clientWithAuth.post()
                     .uri(urlContacts)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(createContactDto)
                     .retrieve()
                     .body(ContactResponseDto.class);
-            return response;
 
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode().equals(HttpStatus.TOO_MANY_REQUESTS)) {
-                throw new HubSpotRateLimitExceededException("Limite de requisições excedido.");
+                throw new HubSpotRateLimitExceededException(RATE_LIMIT_EXCEEDED);
             }
 
             if (e.getStatusCode().equals(HttpStatus.CONFLICT)) {
-                throw new HubSpotBadRequestException("Erro de conflito ao criar contato.");
+                throw new HubSpotBadRequestException(CONFLICT_ON_CREATE);
             }
 
-            throw new HubSpotApiException("Erro na API do HubSpot: " + e.getMessage());
+            throw new HubSpotApiException(HUBSPOT_API_ERROR_PREFIX + e.getMessage());
         }
     }
 }
