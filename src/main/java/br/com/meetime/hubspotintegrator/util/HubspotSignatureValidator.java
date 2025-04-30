@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 
 public class HubspotSignatureValidator {
 
-    public static boolean isValid(String signature, String requestBody, String clientSecret, String v1) {
+    public static boolean isValid(String signature, String requestBody, String clientSecret) {
         try {
             String combined = clientSecret + requestBody;
 

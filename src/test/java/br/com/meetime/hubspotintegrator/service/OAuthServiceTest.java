@@ -1,7 +1,6 @@
 package br.com.meetime.hubspotintegrator.service;
 
 import br.com.meetime.hubspotintegrator.config.HubspotProperties;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

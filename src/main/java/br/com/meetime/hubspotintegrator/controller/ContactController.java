@@ -4,7 +4,6 @@ import br.com.meetime.hubspotintegrator.documentation.ContactApiDoc;
 import br.com.meetime.hubspotintegrator.dto.request.CreateContactDto;
 import br.com.meetime.hubspotintegrator.dto.response.ContactResponseDto;
 import br.com.meetime.hubspotintegrator.service.ContactService;
-import br.com.meetime.hubspotintegrator.service.OAuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

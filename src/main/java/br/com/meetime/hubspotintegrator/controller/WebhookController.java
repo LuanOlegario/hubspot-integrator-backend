@@ -23,12 +23,14 @@ public class WebhookController implements WebhookApiDoc {
     private final HubspotProperties hubspotProperties;
     private final ObjectMapper objectMapper;
 
+    public static final String CONTACT_CREATION_OK = "CONTACT_CREATION_OK";
+
     @PostMapping
     public ResponseEntity<String> receiveWebhook(@RequestHeader("X-HubSpot-Signature") String signature,
                                                  @RequestBody String requestBody) {
         log.info("Recebido webhook: {}", requestBody);
 
-        boolean isValid = HubspotSignatureValidator.isValid(signature, requestBody, hubspotProperties.getClientSecret(), "v1");
+        boolean isValid = HubspotSignatureValidator.isValid(signature, requestBody, hubspotProperties.getClientSecret());
 
         if (!isValid) {
             log.warn("Assinatura inválida recebida no webhook.");
@@ -43,7 +45,7 @@ public class WebhookController implements WebhookApiDoc {
             );
 
             events.stream()
-                    .filter(event -> "CONTACT_CREATION_OK".equalsIgnoreCase(event.subscriptionType()))
+                    .filter(event -> CONTACT_CREATION_OK.equalsIgnoreCase(event.subscriptionType()))
                     .forEach(event -> {
                         log.info("Contato criado. ID: {}, Email: {}", event.objectId());
                     });

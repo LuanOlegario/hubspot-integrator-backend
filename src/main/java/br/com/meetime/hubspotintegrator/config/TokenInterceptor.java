@@ -1,9 +1,7 @@
 package br.com.meetime.hubspotintegrator.config;
 
-import br.com.meetime.hubspotintegrator.service.OAuthService;
 import br.com.meetime.hubspotintegrator.service.TokenStoreService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
