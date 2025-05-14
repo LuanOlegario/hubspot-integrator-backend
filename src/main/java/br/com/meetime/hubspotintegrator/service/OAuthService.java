@@ -13,6 +13,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +27,12 @@ public class OAuthService {
     private final RestClient authRestClient;
     private final TokenService tokenService;
 
+    private final Map<String, Instant> stateMap = new ConcurrentHashMap<>();
+    private static final long STATE_EXPIRATION_SECONDS = 300;
+
     public String generateAuthorizationUrl() {
         String encodedScopes = URLEncoder.encode(hubspotProperties.getScope(), StandardCharsets.UTF_8);
+        String state = generateState();
 
         return UriComponentsBuilder
                 .fromUriString(hubspotProperties.getAuthorizationUrl())
@@ -32,6 +40,7 @@ public class OAuthService {
                 .queryParam("redirect_uri", hubspotProperties.getRedirectUri())
                 .queryParam("scope", encodedScopes)
                 .queryParam("response_type", "code")
+                .queryParam("state", state)
                 .build()
                 .toUriString();
     }
@@ -66,5 +75,23 @@ public class OAuthService {
 
     private String urlEncode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    private String generateState() {
+        String state = UUID.randomUUID().toString();
+        stateMap.put(state, Instant.now().plusSeconds(STATE_EXPIRATION_SECONDS));
+        return state;
+    }
+
+    public boolean isValidState(String state) {
+        Instant expiration = stateMap.get(state);
+
+        if (expiration == null || Instant.now().isAfter(expiration)) {
+            log.warn("State inválido ou expirado: {}", state);
+            return false;
+        }
+
+        stateMap.remove(state);
+        return true;
     }
 }

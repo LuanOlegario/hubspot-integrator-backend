@@ -24,5 +24,8 @@ public interface OAuthApiDoc {
             @ApiResponse(responseCode = "400", description = "Parâmetro 'code' ausente ou inválido")
     })
     @GetMapping("/callback")
-    void handleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException;
+    void handleCallback(@RequestParam("code") String code,
+                        @RequestParam("state") String state,
+                        HttpServletResponse response) throws IOException;
 }
+

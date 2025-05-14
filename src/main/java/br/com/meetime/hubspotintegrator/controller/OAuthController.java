@@ -25,8 +25,15 @@ public class OAuthController implements OAuthApiDoc {
 
     @GetMapping("/callback")
     public void handleCallback(@RequestParam("code") String code,
+                               @RequestParam("state") String state,
                                HttpServletResponse response) throws IOException {
         log.info("Código recebido no callback: {}", code);
+
+        if (!oAuthService.isValidState(state)) {
+            log.warn("Tentativa de callback com state inválido: {}", state);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parâmetro state inválido. Tente novamente.");
+            return;
+        }
         oAuthService.exchangeCodeForToken(code);
         response.sendRedirect("/create-contact.html");
     }
